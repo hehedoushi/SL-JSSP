@@ -311,12 +311,13 @@ def slice_manage(jobs_data, jobs_data_slice, timeline_choices, next_choices):
     return compete_objects
 
 
-def result_manage(string):
+def result_manage(path, string):
     """
+    :param path
     :param string: 问题名称 test8_0类似
     :return: 在文件slice中写入数据文件
     """
-    file_name = './jsp_data_8/' + string + '.txt'  # './jsp_data/FT06.txt'
+    file_name = path + string + '.txt'  # './jsp_data/FT06.txt'
     data, check = load_text(file_name)  # data读取的是文本中全部的数据
     if data is not None:
         a = list(map(int, data.split()))  # 创建一个列表，使用 split() 函数进行分割 # map() 函数根据提供的函数对指定序列做映射
@@ -457,7 +458,7 @@ def get_result_slice():
     new_problem = problem_set(8, 8, num)
     for problem in new_problem:
         MinimalJobshopSat(temp, problem)
-        result_manage(problem)
+        result_manage(temp, problem)
         data = np.load('./jsp_result_slice/' + problem + '.npy')
         data_list.append(data)
         # 使用 numpy.concatenate() 函数将数据进行合并
@@ -469,9 +470,10 @@ def get_result_slice():
 
 
 if __name__ == '__main__':
+
     for i in range(20):
         str_ = 'test8_%i' % (i + 0)
-        result_manage(str_)
+        result_manage('./jsp_data_8/', str_)
 
     # data_list = []
     # for i in range(2000):

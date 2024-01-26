@@ -1,4 +1,5 @@
 import json
+from enum import Enum
 import paddle
 import numpy as np
 import chardet
@@ -7,6 +8,11 @@ import collections
 from jsp_deeplearn import PCCNN_2
 from jsp_result_manage import getdata_str
 
+class Solution(Enum):
+    Ours = 1
+    SPT = 2
+    MWKR = 3
+    MOPNR = 4
 
 def nestedList(check):
     returnValue = 0
@@ -89,15 +95,7 @@ def softmax_max(x):
     return max(softmax_x)
 
 
-def model_solve(path, string='test8_0', way='SPT'):
-    # 准备模型
-    model = PCCNN_2()
-    params_file_path = './model.pdparams'
-    # 加载模型参数
-    param_dict = paddle.load(params_file_path)
-    model.load_dict(param_dict)
-    model.eval()
-
+def model_solve(path, string='test8_0', way=Solution.SPT):
     file_name = path + string + '.txt'  # './jsp_data/FT06.txt'
     data, check = load_text(file_name)  # data读取的是文本中全部的数据
     if data is None:
@@ -145,7 +143,7 @@ def model_solve(path, string='test8_0', way='SPT'):
             compete_slice_dict[_[0]].append(_)
         # print('\n time: ', time_note, '\n choice_slice_dict:', choice_slice_dict, '\n compete_objects:', compete_slice_dict)
         note_choices = []
-        if way == 'SPT':
+        if way == Solution.SPT:
             machine_choice_dict = {}
             for choice in choice_list_jobs:
                 machine = jobs_data[choice[0]][choice[1]][0]
@@ -159,7 +157,7 @@ def model_solve(path, string='test8_0', way='SPT'):
                             jobs_data[choice[0]][choice[1]][1]:
                         machine_choice_dict[machine] = choice
             note_choices = list(machine_choice_dict.values())
-        elif way == 'MWKR':
+        elif way == Solution.MWKR:
             machine_choice_dict = {}
             for choice in choice_list_jobs:
                 machine = jobs_data[choice[0]][choice[1]][0]
@@ -173,7 +171,7 @@ def model_solve(path, string='test8_0', way='SPT'):
                     # if sum1 > sum2:
                     #     machine_choice_dict[machine] = choice
             note_choices = list(machine_choice_dict.values())
-        elif way == 'MOPNR':
+        elif way == Solution.MOPNR:
             # 最少操作剩余(LOR)最多操作剩余(MOR)
             machine_choice_dict = {}
             for choice in choice_list_jobs:
@@ -187,7 +185,14 @@ def model_solve(path, string='test8_0', way='SPT'):
                     #     machine_choice_dict[machine] = choice
             note_choices = list(machine_choice_dict.values())
 
-        elif way == 'OURS':
+        elif way == Solution.Ours:
+            # 准备模型
+            model = PCCNN_2()
+            params_file_path = './model4test1.pdparams'
+            # 加载模型参数
+            param_dict = paddle.load(params_file_path)
+            model.load_dict(param_dict)
+            model.eval()
             false_list = []
             while len(choice_slice_dict) != 0:
                 choice = choice_slice_dict[0]
@@ -303,7 +308,7 @@ def model_solve(path, string='test8_0', way='SPT'):
 
 
 if __name__ == '__main__':
-    problem = ['./tai_problem/', 'ta1515', 'OURS']
+    problem = ['./tai_problem/', 'ta1515', Solution.Ours]
     for num in range(10):
         temp = problem[1] + str(num + 0)
         model_solve(problem[0], temp, problem[2]) * 100
